@@ -46,7 +46,7 @@ To run this project locally, follow these steps:
 2. **Open your browser and navigate to:**
 
    ```sh
-   http://localhost:3000
+   http://localhost:3000/listings
    
 ## Contributing
 
