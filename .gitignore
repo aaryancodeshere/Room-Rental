@@ -1,2 +1,20 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore the entire .vscode directory
 .vscode/
+
+
+# Ignore environment variable files
+.env
+
+# Ignore logs
+logs
+*.log
+
+# Ignore OS-specific files
 .DS_Store
+Thumbs.db
+
+# Ignore dependency directories
+node_modules/

@@ -20,7 +20,7 @@ async function main() {
 }
 
 app.listen(3000,()=>{
-    console.log("hello");
+    console.log("Connected!");
 });
 
 //index route
