@@ -17,7 +17,7 @@ Wanderlust is a Node.js project for managing room rentals. It allows users to cr
 - View all room rental listings.
 - Responsive design using Bootstrap.
 
-## Installation
+## Installationn
 
 To run this project locally, follow these steps:
 
