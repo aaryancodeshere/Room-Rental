@@ -1,5 +1,7 @@
 # Wanderlust
 
+Live: https://room-rental-y338.onrender.com
+
 Wanderlust is a Node.js project for managing room rentals. It allows users to create, edit, and manage listings for room rentals. This project includes features like adding titles, descriptions, images, prices, countries, and locations for each listing.
 
 <img width="1440" alt="Screenshot 2024-07-09 at 2 27 38 PM" src="https://github.com/aaryancodeshere/Room-Rental/assets/124273822/322b305c-8eea-4b7a-8ef9-a3c41ebddc61">
