@@ -1,12 +1,31 @@
+if(process.env.NODE_ENV != "production"){
+  require('dotenv').config();
+}
+
+
+
 const express = require("express");
 const app = express();
 const mongoose =  require("mongoose");
-const Listing = require("./models/listing");
 const path = require("path");
 const methodOverride= require("method-override");
 const ejsMate = require("ejs-mate");
-const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
+const session = require("express-session");
+const MongoStore = require('connect-mongo');
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
+
+
+ 
+
+const listingsRouter = require("./routes/listing.js");
+const reviewsRouter= require("./routes/review.js");
+const userRouter= require("./routes/user.js");
+const searchRouter = require("./routes/search.js");
+const dbUrl = process.env.ATLAS_URL;
 
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"views"));
@@ -16,76 +35,67 @@ app.engine("ejs",ejsMate);
 app.use(express.static(path.join(__dirname,"/public")));
 
 
-main().catch(err => console.log(err));
 
-async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/wanderlust');
-  console.log("Connected to DB");
-}
-
-
-
-app.listen(3000,()=>{
-    console.log("Connected!");
-});
-
-
-
-//index route
-
-app.get("/listings",wrapAsync(async (req,res)=>{
-    const allListings= await Listing.find({});
-    res.render("listings/index", {allListings});
-}))
-
-//new route
-app.get("/listings/new", (req,res)=>{
-  res.render("listings/new");
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: process.env.SECRET,
+  },
+  touchAfter: 24 * 60 * 60
 })
 
-//Create route
+store.on("error",()=>{
+  console.log("Error in Mongo Session Store",err);
+})
 
-app.post("/listings",wrapAsync(async(req,res)=>{
-  const newListing = new Listing(req.body.listing);
-   await newListing.save(); 
-   res.redirect("/listings");
+const sessionOptions = {
+  store,
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 *7,
+    maxAge: 1000 * 60 * 60 * 24 *7
+  }
+};
 
-}))
 
-//show route
 
-app.get("/listings/:id", wrapAsync(async(req,res,next)=>{
-  
-    const {id}= req.params;
-    const listing = await Listing.findById(id);
-    res.render("listings/show.ejs",{listing});
 
-  
-}))
+app.use(session(sessionOptions));
+app.use(flash());
 
-//edit route
-app.get("/listings/:id/edit", wrapAsync(async(req,res,next)=>{
-        const {id}= req.params;
-        const listing = await Listing.findById(id);
-        res.render("listings/edit", {listing});       
-}))
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
 
-//Update Route
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
-app.put("/listings/:id", wrapAsync(async(req,res,next)=>{
-    let {id} = req.params;
-    await Listing.findByIdAndUpdate(id,{...req.body.listing});
-    res.redirect(`/listings/${id}`)  
-}))
+app.use((req,res,next)=>{
+    res.locals.success= req.flash("success");
+    res.locals.error= req.flash("error");
+    res.locals.currentUser = req.user;
+    next(); 
+})
 
-//Delete Route
+app.use("/listings",listingsRouter);
+app.use("/listings/:id/reviews/",reviewsRouter);
+app.use("/",userRouter);
+app.use("/",searchRouter);
 
-app.delete("/listings/:id", wrapAsync(async(req,res,next)=>{
-    let {id} = req.params;
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
- 
-}))
+
+
+
+//home route
+
+app.get("/",(req,res)=>{
+  res.redirect("/listings");
+})
+
+
+
 app.all("*",(req,res,next)=>{
   next(new ExpressError(404,"Page Not Found"));
 })
@@ -94,3 +104,15 @@ app.use((err,req,res,next)=>{
  let {status=500, message} = err;
  res.status(status).render("listings/error.ejs",{message});
 })
+
+
+main().catch(err => console.log(err));
+
+async function main() {
+  await mongoose.connect(dbUrl);
+  console.log("Connected to DB");
+}
+
+app.listen(3000,()=>{
+  console.log("Connected!");
+});

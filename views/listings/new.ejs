@@ -2,7 +2,7 @@
 
     <body>
         
-        <form method="post" action="/listings" novalidate class="needs-validation">
+        <form method="post" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
             
             <div class="row">
                 <div class="col-6 offset-3">
@@ -18,14 +18,15 @@
                         <textarea type="text" name="listing[description]" id="description"
                             class="form-control" required></textarea>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="image" class="form-label" >Image</label>
-                        <input type="text" placeholder="Enter Image Link/URL" name="listing[image]" id="image" class="form-control" required>
+                        <label for="image" class="form-label" >Upload Image</label>
+                        <input type="file" name="listing[image]" id="image" class="form-control" >
                     </div>
                     <div class="row">
                         <div class="mb-3 col-md-4">
                             <label for="price" class="form-label" >Price</label>
-                            <input type="number" name="listing[price]" id="price" class="form-control" required>
+                            <input  name="listing[price]" id="price" class="form-control" required>
                         </div>
     
                         <div class="mb-3 col-md-8">
