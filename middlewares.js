@@ -47,7 +47,7 @@ module.exports.schemavalidate = (req,res,next)=>{
       throw new ExpressError("400", error);
     }
     next();
-  }
+}
 
  module.exports.reviewvalidate = (req,res,next)=>{
     const {error} = reviewSchema.validate(req.body);
